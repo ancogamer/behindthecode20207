@@ -70,8 +70,7 @@ var f MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
 		insert[i+1][1] = dado.Estação
 		insert[i+1][2] = dado.LAT
 		insert[i+1][3] = dado.LONG
-		insert[i+1][4] = dado.Movimentacao
-		insert[i+1][5] = dado.Original473
+		insert[i+1][4] = dado.Movimentacao 
 		insert[i+1][6] = dado.Original269
 		insert[i+1][7] = dado.Zero
 		insert[i+1][8] = dado.MacaVerde
@@ -88,8 +87,10 @@ var f MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
 		for o=0 ;o<len(controle)-1;o++ {
 			switch {
 			case dado.Row == controle[o]:
+				println("/==============================")
 				println(controle[o])
 				println(dado.Row)
+				println("/==============================")
 				t=false
 			}
 		}
