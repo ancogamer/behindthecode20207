@@ -49,12 +49,12 @@ type dados struct {
 var knt int
 var i int
 var o int
-var controle []int
+var controle [17016]int
 var t bool
 var insert = [17016][14]string{{"Tempo", "Estação", "LAT", "LONG", "Movimentação", "Original_473", "Original_269", "Zero", "Maçã-Verde", "Tangerina", "Citrus", "Açaí-Guaraná", "Pêssego", "Status"}}
 var f MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
-	println(i)
 	//Tempo,Estação,LAT,LONG,Movimentação,Original_473,Original_269,Zero,Maçã-Verde,Tangerina,Citrus,Açaí-Guaraná,Pêssego,Status
+	println(i)
 	var dado dados
 	err := json.Unmarshal(msg.Payload(), &dado)
 	switch err {
@@ -62,10 +62,10 @@ var f MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
 	default:
 		panic(gconcat.Build("erro:", err))
 	}
-	controle=append(controle,dado.Row)
 	switch i {
 	case 0:
-		println(string(msg.Payload()))
+		controle[i]=dado.Row
+		//println(string(msg.Payload()))
 		insert[i+1][0] = dado.Tempo
 		insert[i+1][1] = dado.Estação
 		insert[i+1][2] = dado.LAT
@@ -84,19 +84,28 @@ var f MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
 		writeCSV(insert)
 	default:
 		t = true
-		for o=0 ;o<len(controle)-1;o++ {
+		for _,controle:= range controle{
+		//for o=0 ;o<len(controle);o++ {
 			switch {
-			case dado.Row == controle[o]:
+			case dado.Row == controle:
+			/*
+				println(i)
 				println("/==============================")
-				println(controle[o])
+				println(controle)
 				println(dado.Row)
 				println("/==============================")
+
+			 */
 				t=false
+				i--
 			}
+			i++
 		}
 		switch  t {
 		case true:
-			println(string(msg.Payload()))
+			i++
+			controle[i]=dado.Row
+			//println(string(msg.Payload()))
 			insert[i][0] = dado.Tempo
 			insert[i][1] = dado.Estação
 			insert[i][2] = dado.LAT
@@ -113,8 +122,6 @@ var f MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
 			insert[i][13] = dado.TARGET
 		}
 	}
-	i++
-
 
 }
 
@@ -255,20 +262,29 @@ func main() {
 	opts := MQTT.NewClientOptions().AddBroker("mqtt://tnt-iot.maratona.dev:30573")
 	opts.Password = "ndsjknvkdnvjsbvj"
 	opts.Username = "maratoners"
-	opts.SetClientID("mac-go")
+	opts.SetClientID("macgfyh-go")
 	opts.SetDefaultPublishHandler(f)
 
-	opts.OnConnect = func(c MQTT.Client) {
-		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
-			panic(token.Error())
+	for j:=0;i<1000;j++ {
+		println("Sub n°",j)
+		opts.SetClientID(gconcat.Build("go é amor numero :",j))
+		opts.OnConnect = func(c MQTT.Client) {
+			if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+				panic(token.Error())
+			}
 		}
-	}
-	client := MQTT.NewClient(opts)
-	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		panic(token.Error())
-	} else {
-		fmt.Printf("Connected to server\n")
+		client := MQTT.NewClient(opts)
+		if token := client.Connect(); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		} else {
+			fmt.Printf("Connected to server\n")
+		}
+		opts.OnConnect = func(c MQTT.Client) {
+			if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+				panic(token.Error())
+			}
+		}
 	}
 	<-c
 
-} //end o
+} //end
