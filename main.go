@@ -53,8 +53,10 @@ var controle [17016]int
 var t bool
 var insert = [17016][14]string{{"Tempo", "Estação", "LAT", "LONG", "Movimentação", "Original_473", "Original_269", "Zero", "Maçã-Verde", "Tangerina", "Citrus", "Açaí-Guaraná", "Pêssego", "Status"}}
 var f MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
+	j:=i
 	//Tempo,Estação,LAT,LONG,Movimentação,Original_473,Original_269,Zero,Maçã-Verde,Tangerina,Citrus,Açaí-Guaraná,Pêssego,Status
-	println(i)
+	println(j)
+	println(string(msg.Payload()))
 	var dado dados
 	err := json.Unmarshal(msg.Payload(), &dado)
 	switch err {
@@ -62,30 +64,30 @@ var f MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
 	default:
 		panic(gconcat.Build("erro:", err))
 	}
-	switch i {
+	switch j {
 	case 0:
-		controle[i]=dado.Row
-		//println(string(msg.Payload()))
-		insert[i+1][0] = dado.Tempo
-		insert[i+1][1] = dado.Estação
-		insert[i+1][2] = dado.LAT
-		insert[i+1][3] = dado.LONG
-		insert[i+1][4] = dado.Movimentacao 
-		insert[i+1][6] = dado.Original269
-		insert[i+1][7] = dado.Zero
-		insert[i+1][8] = dado.MacaVerde
-		insert[i+1][9] = dado.Tangerina
-		insert[i+1][10] = dado.Citrus
-		insert[i+1][11] = dado.AcaiGuaraná
-		insert[i+1][12] = dado.Pessego
-		insert[i+1][13] = dado.TARGET
+		j++
+		controle[0]=dado.Row
+		insert[1][0] = dado.Tempo
+		insert[1][1] = dado.Estação
+		insert[1][2] = dado.LAT
+		insert[1][3] = dado.LONG
+		insert[1][4] = dado.Movimentacao
+		insert[1][6] = dado.Original269
+		insert[1][7] = dado.Zero
+		insert[1][8] = dado.MacaVerde
+		insert[1][9] = dado.Tangerina
+		insert[1][10] = dado.Citrus
+		insert[1][11] = dado.AcaiGuaraná
+		insert[1][12] = dado.Pessego
+		insert[1][13] = dado.TARGET
 		break
 	case 17016:
 		writeCSV(insert)
 	default:
 		t = true
 		for _,controle:= range controle{
-		//for o=0 ;o<len(controle);o++ {
+		//for o=0 ;o<i;o++ {
 			switch {
 			case dado.Row == controle:
 			/*
@@ -94,34 +96,32 @@ var f MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
 				println(controle)
 				println(dado.Row)
 				println("/==============================")
-
 			 */
 				t=false
-				i--
+				j--
 			}
-			i++
 		}
 		switch  t {
 		case true:
-			i++
-			controle[i]=dado.Row
-			//println(string(msg.Payload()))
-			insert[i][0] = dado.Tempo
-			insert[i][1] = dado.Estação
-			insert[i][2] = dado.LAT
-			insert[i][3] = dado.LONG
-			insert[i][4] = dado.Movimentacao
-			insert[i][5] = dado.Original473
-			insert[i][6] = dado.Original269
-			insert[i][7] = dado.Zero
-			insert[i][8] = dado.MacaVerde
-			insert[i][9] = dado.Tangerina
-			insert[i][10] = dado.Citrus
-			insert[i][11] = dado.AcaiGuaraná
-			insert[i][12] = dado.Pessego
-			insert[i][13] = dado.TARGET
+			controle[j]=dado.Row
+			insert[j][0] = dado.Tempo
+			insert[j][1] = dado.Estação
+			insert[j][2] = dado.LAT
+			insert[j][3] = dado.LONG
+			insert[j][4] = dado.Movimentacao
+			insert[j][5] = dado.Original473
+			insert[j][6] = dado.Original269
+			insert[j][7] = dado.Zero
+			insert[j][8] = dado.MacaVerde
+			insert[j][9] = dado.Tangerina
+			insert[j][10] = dado.Citrus
+			insert[j][11] = dado.AcaiGuaraná
+			insert[j][12] = dado.Pessego
+			insert[j][13] = dado.TARGET
+			j++
 		}
 	}
+	i=j
 
 }
 
@@ -265,9 +265,8 @@ func main() {
 	opts.SetClientID("macgfyh-go")
 	opts.SetDefaultPublishHandler(f)
 
-	for j:=0;i<1000;j++ {
-		println("Sub n°",j)
-		opts.SetClientID(gconcat.Build("go é amor numero :",j))
+
+		opts.SetClientID(gconcat.Build("go é amor numero :"))
 		opts.OnConnect = func(c MQTT.Client) {
 			if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
 				panic(token.Error())
@@ -284,7 +283,265 @@ func main() {
 				panic(token.Error())
 			}
 		}
+	opts.SetClientID(gconcat.Build("go é amor numero :"))
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
 	}
+	client = MQTT.NewClient(opts)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	} else {
+		fmt.Printf("Connected to server\n")
+	}
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	opts.SetClientID(gconcat.Build("go é amor numero :"))
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	client = MQTT.NewClient(opts)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	} else {
+		fmt.Printf("Connected to server\n")
+	}
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	opts.SetClientID(gconcat.Build("go é amor numero :"))
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	client = MQTT.NewClient(opts)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	} else {
+		fmt.Printf("Connected to server\n")
+	}
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	opts.SetClientID(gconcat.Build("go é amor numero :"))
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	client = MQTT.NewClient(opts)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	} else {
+		fmt.Printf("Connected to server\n")
+	}
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	opts.SetClientID(gconcat.Build("go é amor numero :"))
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	client = MQTT.NewClient(opts)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	} else {
+		fmt.Printf("Connected to server\n")
+	}
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	opts.SetClientID(gconcat.Build("go é amor numero :"))
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	client = MQTT.NewClient(opts)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	} else {
+		fmt.Printf("Connected to server\n")
+	}
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	opts.SetClientID(gconcat.Build("go é amor numero :"))
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	client = MQTT.NewClient(opts)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	} else {
+		fmt.Printf("Connected to server\n")
+	}
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	opts.SetClientID(gconcat.Build("go é amor numero :"))
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	client = MQTT.NewClient(opts)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	} else {
+		fmt.Printf("Connected to server\n")
+	}
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	opts.SetClientID(gconcat.Build("go é amor numero :"))
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	client = MQTT.NewClient(opts)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	} else {
+		fmt.Printf("Connected to server\n")
+	}
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	opts.SetClientID(gconcat.Build("go é amor numero :"))
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	client = MQTT.NewClient(opts)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	} else {
+		fmt.Printf("Connected to server\n")
+	}
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	opts.SetClientID(gconcat.Build("go é amor numero :"))
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	client = MQTT.NewClient(opts)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	} else {
+		fmt.Printf("Connected to server\n")
+	}
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	opts.SetClientID(gconcat.Build("go é amor numero :"))
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	client = MQTT.NewClient(opts)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	} else {
+		fmt.Printf("Connected to server\n")
+	}
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	opts.SetClientID(gconcat.Build("go é amor numero :"))
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	client = MQTT.NewClient(opts)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	} else {
+		fmt.Printf("Connected to server\n")
+	}
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	opts.SetClientID(gconcat.Build("go é amor numero :"))
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	client = MQTT.NewClient(opts)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	} else {
+		fmt.Printf("Connected to server\n")
+	}
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	opts.SetClientID(gconcat.Build("go é amor numero :"))
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+	client = MQTT.NewClient(opts)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	} else {
+		fmt.Printf("Connected to server\n")
+	}
+	opts.OnConnect = func(c MQTT.Client) {
+		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
+			panic(token.Error())
+		}
+	}
+
+
+
+
 	<-c
 
 } //end
