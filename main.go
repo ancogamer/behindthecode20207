@@ -98,7 +98,6 @@ var f MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
 				println("/==============================")
 			 */
 				t=false
-				j--
 			}
 		}
 		switch  t {
@@ -521,23 +520,24 @@ func main() {
 			panic(token.Error())
 		}
 	}
-	opts.SetClientID(gconcat.Build("go é amor numero :"))
-	opts.OnConnect = func(c MQTT.Client) {
-		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
-			panic(token.Error())
-		}
-	}
-	client = MQTT.NewClient(opts)
-	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		panic(token.Error())
-	} else {
-		fmt.Printf("Connected to server\n")
-	}
-	opts.OnConnect = func(c MQTT.Client) {
-		if token := c.Subscribe("tnt", 0, f); token.Wait() && token.Error() != nil {
-			panic(token.Error())
-		}
-	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
