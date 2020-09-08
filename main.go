@@ -51,7 +51,7 @@ var i int
 var o int
 var controle [17016]int
 var t bool
-var insert = [17016][14]string{{"Tempo", "Estação", "LAT", "LONG", "Movimentação", "Original_473", "Original_269", "Zero", "Maçã-Verde", "Tangerina", "Citrus", "Açaí-Guaraná", "Pêssego", "Status"}}
+var insert = [17016][14]string{{"Tempo", "Estação", "LAT", "LONG", "Movimentação", "Original_473", "Original_269", "Zero", "Maçã-Verde", "Tangerina", "Citrus", "Açaí-Guaraná", "Pêssego", "TARGET"}}
 var f MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
 	j:=i
 	//Tempo,Estação,LAT,LONG,Movimentação,Original_473,Original_269,Zero,Maçã-Verde,Tangerina,Citrus,Açaí-Guaraná,Pêssego,Status
